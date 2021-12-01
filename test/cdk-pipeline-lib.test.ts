@@ -1,9 +1,7 @@
-// import { Template } from '@aws-cdk/assertions';
-// import * as cdk from '@aws-cdk/core';
-// import * as CdkPipelineLib from '../lib/index';
+import { Template } from '@aws-cdk/assertions';
+import * as cdk from '@aws-cdk/core';
+import { CodeStarConnectionDef, MultiSourcePipeline } from '../lib';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/index.ts
 test('SQS Queue Created', () => {
 //   const app = new cdk.App();
 //   const stack = new cdk.Stack(app, 'TestStack');
@@ -16,3 +14,24 @@ test('SQS Queue Created', () => {
 //     VisibilityTimeout: 300
 //   });
 });
+
+test('Pipeline Single Source', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack');
+
+    const source = new CodeStarConnectionDef({
+        codeStarConnection: "arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555",
+        repo: "test-repo",
+        repoOwner: "test-owner"
+    });
+
+    new MultiSourcePipeline(stack, 'MultiSourcePipline', {
+        sources: [source]
+    });
+
+    const template = Template.fromStack(stack);
+
+    template.hasResourceProperties('AWS::CodePipeline', {});
+});
+
+test('Pipeline Multiple Sources', () => {});
