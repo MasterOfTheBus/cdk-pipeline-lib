@@ -20,6 +20,9 @@
     "@aws-cdk/core": "1.132.0"
   },
   "dependencies": {
+    "@aws-cdk/aws-codepipeline": "^1.134.0",
+    "@aws-cdk/aws-codepipeline-actions": "^1.134.0",
+    "@aws-cdk/aws-s3": "^1.134.0",
     "@aws-cdk/core": "1.132.0"
   }
 }
