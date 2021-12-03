@@ -1,19 +1,8 @@
-import { Template } from '@aws-cdk/assertions';
+import { Capture, Template } from '@aws-cdk/assertions';
 import * as cdk from '@aws-cdk/core';
-import { CodeStarConnectionDef, MultiSourcePipeline } from '../lib';
-
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//   const stack = new cdk.Stack(app, 'TestStack');
-//   // WHEN
-//   new CdkPipelineLib.CdkPipelineLib(stack, 'MyTestConstruct');
-//   // THEN
-//   const template = Template.fromStack(stack);
-
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
-});
+import { Bucket } from "@aws-cdk/aws-s3";
+import { CodeStarConnectionDef } from '../lib/source-def';
+import { MultiSourcePipeline } from '../lib/multi-source-artifact-pipeline';
 
 test('Pipeline Single Source', () => {
     const app = new cdk.App();
@@ -25,13 +14,28 @@ test('Pipeline Single Source', () => {
         repoOwner: "test-owner"
     });
 
+    // Define the bucket to store the artifacts
+    const bucket = new Bucket(stack, 'PipelineBucket');
+
     new MultiSourcePipeline(stack, 'MultiSourcePipline', {
-        sources: [source]
+        sources: [source],
+        deployBucket: bucket
     });
 
     const template = Template.fromStack(stack);
 
-    template.hasResourceProperties('AWS::CodePipeline', {});
+    const sourceStageCapture = new Capture();
+    const buildStageCapture = new Capture();
+
+    template.resourceCountIs('AWS::CodePipeline::Pipeline', 1);
+    template.hasResourceProperties('AWS::CodePipeline::Pipeline', {
+        Stages: [sourceStageCapture, buildStageCapture]
+    });
+
+    const sourceStage = sourceStageCapture.asObject();
+    const buildStage = buildStageCapture.asObject();
+
+    expect(sourceStage.Name).toBe('Source');
 });
 
 test('Pipeline Multiple Sources', () => {});

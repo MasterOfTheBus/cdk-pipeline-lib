@@ -6,6 +6,7 @@ import { CodeBuildProjectConstruct } from "./code-build-project";
 
 export interface MultiSourcePipelineProps {
     sources: [SourceDef];
+    deployBucket: Bucket;
     pipelineName?: string;
     crossAccount?: boolean;
 }
@@ -16,41 +17,54 @@ export class MultiSourcePipeline extends Construct {
     constructor(scope: Construct, id: string, props: MultiSourcePipelineProps) {
         super(scope, id);
 
-        this.pipeline = new Pipeline(this, 'Pipeline', {
+        const multiSourcePipeline = new Pipeline(this, 'Pipeline', {
             pipelineName: props.pipelineName || 'MyPipeline',
             crossAccountKeys: props.crossAccount || false
         });
 
-        // Define the bucket to store the artifacts
-        const bucket = new Bucket(this, 'PipelineBucket');
-
         // Define the sources
-        const sourceArtifactMapping = new Map();
+        const sourceArtifactTupleArray = new Array<[SourceDef, Artifact]>();
+        // const sourceArtifactMapping = new Map<SourceDef, Artifact>();
         const sourceActions = Array<Action>();
         props.sources.forEach(source => {
             const sourceArtifact = new Artifact(`source-${source.repo}`);
-            sourceArtifactMapping.set(source, sourceArtifact);
+            // sourceArtifactMapping.set(source, sourceArtifact);
+            sourceArtifactTupleArray.push([source, sourceArtifact]);
             sourceActions.push(SourceActionFactory.createSourceAction({
                 sourceDef: source,
                 sourceArtifact: sourceArtifact
             }))
         });
-        this.pipeline.addStage({
+        multiSourcePipeline.addStage({
             stageName: 'Source',
             actions: sourceActions
         });
 
         // Define the build stages
-        sourceArtifactMapping.forEach((source, artifact) => {
+        for (const [source, artifact] of sourceArtifactTupleArray) {
             const codeBuild = new CodeBuildProjectConstruct(this, `CodeBuild-${source.repo}`, {
                 sourceInfo: source,
                 sourceArtifact: artifact,
-                deployBucket: bucket
+                deployBucket: props.deployBucket
             });
-            this.pipeline.addStage({
+            multiSourcePipeline.addStage({
                 stageName: `Build-${source.repo}`,
                 actions: [codeBuild.buildAction]
-            })
-        });
+            });
+        }
+
+        // sourceArtifactMapping.forEach((artifact, source) => {
+        //     const codeBuild = new CodeBuildProjectConstruct(this, `CodeBuild-${source.repo}`, {
+        //         sourceInfo: source,
+        //         sourceArtifact: artifact,
+        //         deployBucket: props.deployBucket
+        //     });
+        //     pipeline.addStage({
+        //         stageName: `Build-${source.repo}`,
+        //         actions: [codeBuild.buildAction]
+        //     })
+        // });
+
+        this.pipeline = multiSourcePipeline;
     }
 }
