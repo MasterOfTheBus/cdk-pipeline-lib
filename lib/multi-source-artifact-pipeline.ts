@@ -24,11 +24,9 @@ export class MultiSourcePipeline extends Construct {
 
         // Define the sources
         const sourceArtifactTupleArray = new Array<[SourceDef, Artifact]>();
-        // const sourceArtifactMapping = new Map<SourceDef, Artifact>();
         const sourceActions = Array<Action>();
         props.sources.forEach(source => {
             const sourceArtifact = new Artifact(`source-${source.repo}`);
-            // sourceArtifactMapping.set(source, sourceArtifact);
             sourceArtifactTupleArray.push([source, sourceArtifact]);
             sourceActions.push(SourceActionFactory.createSourceAction({
                 sourceDef: source,
@@ -52,18 +50,6 @@ export class MultiSourcePipeline extends Construct {
                 actions: [codeBuild.buildAction]
             });
         }
-
-        // sourceArtifactMapping.forEach((artifact, source) => {
-        //     const codeBuild = new CodeBuildProjectConstruct(this, `CodeBuild-${source.repo}`, {
-        //         sourceInfo: source,
-        //         sourceArtifact: artifact,
-        //         deployBucket: props.deployBucket
-        //     });
-        //     pipeline.addStage({
-        //         stageName: `Build-${source.repo}`,
-        //         actions: [codeBuild.buildAction]
-        //     })
-        // });
 
         this.pipeline = multiSourcePipeline;
     }
