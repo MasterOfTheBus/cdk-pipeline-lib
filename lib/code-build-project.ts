@@ -1,8 +1,8 @@
-import { Construct } from "@aws-cdk/core";
-import { Artifact } from '@aws-cdk/aws-codepipeline';
-import { Action, CodeBuildAction } from "@aws-cdk/aws-codepipeline-actions";
-import { Artifacts, Project, Source, FilterGroup, EventAction } from "@aws-cdk/aws-codebuild";
-import { Bucket } from "@aws-cdk/aws-s3";
+import { Construct } from 'constructs';
+import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
+import { Action, CodeBuildAction } from "aws-cdk-lib/aws-codepipeline-actions";
+import { Artifacts, Project, Source, FilterGroup, EventAction } from "aws-cdk-lib/aws-codebuild";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { SourceDef } from "./source-def";
 
 export interface CodeBuildConstructProps {

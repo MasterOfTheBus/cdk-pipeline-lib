@@ -1,7 +1,7 @@
-import { Template } from '@aws-cdk/assertions';
-import * as cdk from '@aws-cdk/core';
-import { Artifact } from '@aws-cdk/aws-codepipeline';
-import { Bucket } from "@aws-cdk/aws-s3";
+import { Template } from 'aws-cdk-lib/assertions';
+import * as cdk from 'aws-cdk-lib/core';
+import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { CodeStarConnectionDef } from '../lib/source-def';
 import { CodeBuildProjectConstruct } from '../lib/code-build-project'
 

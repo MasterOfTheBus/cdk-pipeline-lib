@@ -1,5 +1,5 @@
-import { Artifact } from "@aws-cdk/aws-codepipeline";
-import { CodeStarConnectionsSourceAction } from "@aws-cdk/aws-codepipeline-actions";
+import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
+import { CodeStarConnectionsSourceAction } from "aws-cdk-lib/aws-codepipeline-actions";
 
 export interface SourceDefProps {
     repo: string;

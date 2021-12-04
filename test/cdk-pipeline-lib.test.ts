@@ -1,6 +1,6 @@
-import { Capture, Template } from '@aws-cdk/assertions';
-import * as cdk from '@aws-cdk/core';
-import { Bucket } from "@aws-cdk/aws-s3";
+import { Capture, Template } from 'aws-cdk-lib/assertions';
+import * as cdk from 'aws-cdk-lib';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { CodeStarConnectionDef } from '../lib/source-def';
 import { MultiSourcePipeline } from '../lib/multi-source-artifact-pipeline';
 

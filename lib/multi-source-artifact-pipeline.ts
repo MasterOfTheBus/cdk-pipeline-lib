@@ -1,6 +1,6 @@
-import { Construct } from "@aws-cdk/core";
-import { Action, Artifact, Pipeline } from '@aws-cdk/aws-codepipeline';
-import { Bucket } from "@aws-cdk/aws-s3";
+import { Construct } from 'constructs';
+import { Action, Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { SourceActionFactory, SourceDef } from "./source-def";
 import { CodeBuildProjectConstruct } from "./code-build-project";
 
