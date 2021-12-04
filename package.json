@@ -9,7 +9,8 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@aws-cdk/assertions": "1.132.0",
+    "aws-cdk-lib": "^2.0.0",
+    "constructs": "^10.0.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "jest": "^26.4.2",
@@ -17,12 +18,11 @@
     "typescript": "~3.9.7"
   },
   "peerDependencies": {
-    "@aws-cdk/core": "1.132.0"
+    "aws-cdk-lib": "^2.0.0",
+    "constructs": "^10.0.0"
   },
   "dependencies": {
-    "@aws-cdk/aws-codepipeline": "^1.134.0",
-    "@aws-cdk/aws-codepipeline-actions": "^1.134.0",
-    "@aws-cdk/aws-s3": "^1.134.0",
-    "@aws-cdk/core": "1.132.0"
+    "aws-cdk-lib": "^2.0.0",
+    "constructs": "^10.0.0"
   }
 }
