@@ -5,7 +5,7 @@ import { SourceActionFactory, SourceDef } from "./source-def";
 import { CodeBuildProjectConstruct } from "./code-build-project";
 
 export interface MultiSourcePipelineProps {
-    sources: [SourceDef];
+    sources: SourceDef[];
     deployBucket: Bucket;
     pipelineName?: string;
     crossAccount?: boolean;
