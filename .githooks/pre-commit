@@ -2,7 +2,7 @@
 
 # Get the package.json version and the git tag version on main branch
 VERSION="$(cat package.json | json version)"
-GITTAG="$(git tag --points-at HEAD)"
+GITTAG="$(git tag --points-at origin/main)"
 MAINVERSION=${GITTAG//v/}
 
 # If the versions are equal, this indicates this is just a change and not a release
@@ -10,8 +10,10 @@ MAINVERSION=${GITTAG//v/}
 if [ "$VERSION" == "$MAINVERSION" ]
 then
     NEWVERSION="$(semver --increment patch $VERSION)"
-    json -I -f package.json -e "this.version=\"$VERSION\""
+    json -I -f package.json -e "this.version=\"$NEWVERSION\""
+    echo "package.json version patched: $(cat package.json | json version)"
 fi
 
 # If the versions are not equal, do nothing.
 # This indicates a manual change in order to do a major or minor bump of the version for a release
+# Or indicates that a previous commit already patched the version

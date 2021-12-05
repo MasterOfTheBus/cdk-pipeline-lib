@@ -4,6 +4,26 @@ This construct library is meant to help create a CDK pipeline that accepts multi
 For now the default is that there is a corresponding CodeBuild Project created for each input source.
 The library also creates a corresponding Pipeline Stage that uses a single CodeBuild Action for each input source.
 
+## Usage
+
+```
+    const source = new CodeStarConnectionDef({
+        // A CodeStar Connection ARN
+        codeStarConnection: "arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555",
+        repo: "test-repo",
+        repoOwner: "test-owner",
+        branch: "main"
+    });
+
+    // Define the bucket to store the artifacts
+    const bucket = new Bucket(stack, 'PipelineBucket');
+
+    new MultiSourcePipeline(stack, 'MultiSourcePipline', {
+        sources: [source],
+        deployBucket: bucket
+    });
+```
+
 ## Useful commands
 
  * `npm run build`   compile typescript to js
