@@ -12,6 +12,8 @@ then
     NEWVERSION="$(semver --increment patch $VERSION)"
     json -I -f package.json -e "this.version=\"$NEWVERSION\""
     echo "package.json version patched: $(cat package.json | json version)"
+    # Create a file to let the post-commit hook know to amend the package.json to the commit
+    touch .commit
 fi
 
 # If the versions are not equal, do nothing.
