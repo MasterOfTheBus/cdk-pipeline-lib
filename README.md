@@ -10,3 +10,11 @@ The construct defines an interface (`CdkPipelineLibProps`) to configure the visi
  * `npm run build`   compile typescript to js
  * `npm run watch`   watch for changes and compile
  * `npm run test`    perform the jest unit tests
+
+## Developer
+
+### Release Process
+* Bump the version in `package.json`
+* When a commit is merged into the `main` branch, it is tagged with the `package.json` version
+* Create a release using the newest created tag
+* A GitHub action should publish a package
