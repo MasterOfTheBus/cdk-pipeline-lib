@@ -2,7 +2,7 @@ import { Capture, Template } from 'aws-cdk-lib/assertions';
 import * as cdk from 'aws-cdk-lib';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { SourceDef, CodeStarConnectionDef } from '../lib/source-def';
-import { MultiSourcePipeline } from '../lib/multi-source-artifact-pipeline';
+import { MultiSourcePipeline } from '../lib/pipeline';
 
 test('Pipeline Single Source', () => {
     const app = new cdk.App();

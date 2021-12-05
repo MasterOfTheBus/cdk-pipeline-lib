@@ -1,7 +1,8 @@
 import { Construct } from 'constructs';
 import { Action, Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { SourceActionFactory, SourceDef } from "./source-def";
+import { SourceDef } from "./source-def";
+import { SourceActionFactory } from "./source-factory";
 import { CodeBuildProjectConstruct } from "./code-build-project";
 
 export interface MultiSourcePipelineProps {
