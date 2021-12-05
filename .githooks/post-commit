@@ -5,5 +5,5 @@ if [ -e .commit ]
 then
     rm .commit
     git add package.json
-    git commit --amend -C HEAD --no-verify
+    git commit --amend -C HEAD --no-verify -q
 fi
