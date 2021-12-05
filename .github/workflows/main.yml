@@ -11,7 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      tagversion: ""
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
@@ -21,3 +22,23 @@ jobs:
           npm install
           npm run build
           npm run test
+
+      # Following steps should only run on push events for main branch
+      - name: Setup Version
+        if: github.ref_name == 'main'
+        run: |
+          npm install json
+          echo "tagversion=$(cat package.json | json version)" >> $GITHUB_ENV
+      - name: Tag Latest Commit
+        if: github.ref_name == 'main'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${process.env.tagversion}`,
+              sha: context.sha
+            })
+        
