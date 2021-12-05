@@ -29,15 +29,15 @@ jobs:
       #   run: |
       #     npm install json
       #     echo "tagversion=$(cat package.json | json version)" >> $GITHUB_ENV
-        run: npm install load-json-file
+        run: npm install jsonfile
       - name: Tag Latest Commit
         # if: github.ref_name == 'main'
         uses: actions/github-script@v5
         with:
           github-token: ${{ github.token }}
           script: |
-            const ljf = require('load-json-file')
-            const package = ljf.loadJsonFileSync('package.json')
+            const jsonfile = require('jsonfile')
+            const package = jsonfile.readFileSync('package.json')
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
