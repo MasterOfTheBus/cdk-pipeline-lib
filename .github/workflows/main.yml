@@ -36,8 +36,8 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            import {loadJsonFile} from 'load-json-file';
-            const package = loadJsonFile('package.json')
+            const ljf = require('load-json-file')
+            const package = ljf.loadJsonFileSync('package.json')
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
