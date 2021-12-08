@@ -1,6 +1,6 @@
 {
-  "name": "@MasterOfTheBus/cdk-pipeline-lib",
-  "version": "0.1.3",
+  "name": "@masterofthebus/cdk-pipeline-lib",
+  "version": "0.1.4",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -26,6 +26,6 @@
     "constructs": "^10.0.0"
   },
   "publishConfig": {
-    "@MasterOfTheBus:registry": "https://npm.pkg.github.com"
+    "@masterofthebus:registry": "https://npm.pkg.github.com"
   }
 }
