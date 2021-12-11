@@ -59,6 +59,8 @@ export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
     };
 }
 
+// TODO: So should this be done differently for regular CDK change?
+// Create a ChangeSet prepare and Change set execute?
 export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
     constructor(scope: Construct, id: string, props: BuildSourceConstructProps) {
         super(scope, id);

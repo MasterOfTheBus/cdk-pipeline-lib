@@ -73,31 +73,17 @@ test('Test CdkBuildProjectConstruct', () => {
   });
 
   const template = Template.fromStack(stack);
-  const projectCapture = new Capture();
+  template.resourceCountIs('AWS::CodeBuild::Project', 2);
+  const projects = template.findResources('AWS::CodeBuild::Project');
 
-  console.log(template.toJSON());
-
-  template.resourceCountIs('AWS::CodeBuild::Project', 1);
-  template.hasResource('AWS::CodeBuild::Project', projectCapture);
-
-  const project = projectCapture.asObject();
-
-  expect(project.Properties.Source).toBeTruthy();
-  expect(project.Properties.Source.Type).toEqual('GITHUB');
-  expect(project.Properties.Source.Location).toEqual(`https://github.com/${source.repoOwner}/${source.repo}.git`);
-
-  expect(project.Properties.Artifacts).toBeTruthy();
-  expect(project.Properties.Artifacts.Type).toEqual('S3');
-  expect(project.Properties.Artifacts.Packaging).toEqual('ZIP');
-  expect(project.Properties.Artifacts.Location).toBeTruthy();
-
-  const expectedTriggerFilter = [
-    [
-      { Pattern: 'PUSH', Type: 'EVENT' },
-      { Pattern: 'refs/heads/main', Type: 'HEAD_REF' },
-    ],
-  ];
-  expect(project.Properties.Triggers.FilterGroups).toStrictEqual(expectedTriggerFilter);
+  const synthProject = Object.values(projects).find(value => 
+    value.Properties.Name === `Project-Synth-${source.repo}`
+  );
+  const deployProject = Object.values(projects).find(value => 
+    value.Properties.Name === `Project-Deploy-${source.repo}`
+  );
+  checkProjectProperties(synthProject);
+  checkProjectProperties(deployProject);
 });
 
 describe('Test create Construct helper method', () => {
@@ -107,3 +93,13 @@ describe('Test create Construct helper method', () => {
 
   test('Not supported', () => {});
 });
+
+const checkProjectProperties = (project: any) => {
+  expect(project).toBeTruthy();
+  expect(project.Properties.Source).toBeTruthy();
+  expect(project.Properties.Source.Type).toEqual('CODEPIPELINE');
+  // TODO: Test the build spec
+
+  expect(project.Properties.Artifacts).toBeTruthy();
+  expect(project.Properties.Artifacts.Type).toEqual('CODEPIPELINE');
+}
