@@ -2,7 +2,7 @@ import { Capture, Template } from 'aws-cdk-lib/assertions';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import * as cdk from 'aws-cdk-lib/core';
-import { CodeBuildProjectConstruct } from '../lib/code-build-project';
+import { CdkBuildProjectConstruct, CodeBuildProjectConstruct } from '../lib/code-build-project';
 import { CodeStarConnectionDef } from '../lib/source-def';
 
 test('Test Code Build Construct', () => {
@@ -52,4 +52,58 @@ test('Test Code Build Construct', () => {
     ],
   ];
   expect(project.Properties.Triggers.FilterGroups).toStrictEqual(expectedTriggerFilter);
+});
+
+test('Test CdkBuildProjectConstruct', () => {
+  const app = new cdk.App();
+  const stack = new cdk.Stack(app, 'TestStack');
+
+  const source = new CodeStarConnectionDef({
+    codeStarConnection: 'arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555',
+    repo: 'test-repo',
+    repoOwner: 'test-owner',
+    isCdkSource: true
+  });
+
+  const artifact = new Artifact();
+
+  new CdkBuildProjectConstruct(stack, 'CdkSynthDeploy', {
+    sourceArtifact: artifact,
+    sourceInfo: source
+  });
+
+  const template = Template.fromStack(stack);
+  const projectCapture = new Capture();
+
+  console.log(template.toJSON());
+
+  template.resourceCountIs('AWS::CodeBuild::Project', 1);
+  template.hasResource('AWS::CodeBuild::Project', projectCapture);
+
+  const project = projectCapture.asObject();
+
+  expect(project.Properties.Source).toBeTruthy();
+  expect(project.Properties.Source.Type).toEqual('GITHUB');
+  expect(project.Properties.Source.Location).toEqual(`https://github.com/${source.repoOwner}/${source.repo}.git`);
+
+  expect(project.Properties.Artifacts).toBeTruthy();
+  expect(project.Properties.Artifacts.Type).toEqual('S3');
+  expect(project.Properties.Artifacts.Packaging).toEqual('ZIP');
+  expect(project.Properties.Artifacts.Location).toBeTruthy();
+
+  const expectedTriggerFilter = [
+    [
+      { Pattern: 'PUSH', Type: 'EVENT' },
+      { Pattern: 'refs/heads/main', Type: 'HEAD_REF' },
+    ],
+  ];
+  expect(project.Properties.Triggers.FilterGroups).toStrictEqual(expectedTriggerFilter);
+});
+
+describe('Test create Construct helper method', () => {
+  test('creates CDKBuildProject', () => {});
+
+  test('creates CodeBuildProjectConstruct', () => {});
+
+  test('Not supported', () => {});
 });

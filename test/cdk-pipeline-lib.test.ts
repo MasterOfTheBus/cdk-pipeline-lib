@@ -60,6 +60,7 @@ test('Pipeline Multiple Sources', () => {
     branch: 'main',
   });
 
+  // TODO: Define as CDK source
   const source2 = new CodeStarConnectionDef({
     codeStarConnection: 'arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555',
     repo: 'test-repo-2',
@@ -102,6 +103,7 @@ test('Pipeline Multiple Sources', () => {
 
   // Build Actions
   checkBuildStageValues(buildStage, source, projectRef);
+  // TODO: Check for CDK Build and Deploy Actions
   checkBuildStageValues(build2Stage, source2, project2Ref);
 });
 

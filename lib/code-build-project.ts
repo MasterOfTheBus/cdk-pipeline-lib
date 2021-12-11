@@ -17,6 +17,8 @@ export abstract class AbstractBuildProjectConstruct extends Construct {
 
     constructor(scope: Construct, id: string) {
         super(scope, id);
+        this.buildActions = [];
+        this.outputArtifact = new Artifact();
     }
 }
 
@@ -37,11 +39,13 @@ export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
                       .andBranchIs('main')
                   ]
             }),
-            artifacts: Artifacts.s3({
-                // Use name from the buildspec
-                bucket: props.deployBucket
-            })
-        })
+            artifacts: props.deployBucket ? 
+                Artifacts.s3({
+                    // Use name from the buildspec
+                    bucket: props.deployBucket
+                }) :
+                undefined
+        });
 
         this.outputArtifact = new Artifact();
         this.buildActions = [
@@ -64,6 +68,7 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
             projectName: `Project-Synth-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2'
+                // TODO
             })
         });
         const synthOutput = new Artifact();
@@ -72,6 +77,7 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
             projectName: `Project-Deploy-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2'
+                // TODO
             })
         });
 
