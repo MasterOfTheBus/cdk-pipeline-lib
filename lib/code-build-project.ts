@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Action, CodeBuildAction } from "aws-cdk-lib/aws-codepipeline-actions";
-import { Artifacts, Project, Source, FilterGroup, EventAction } from "aws-cdk-lib/aws-codebuild";
+import { Artifacts, BuildSpec, Project, PipelineProject, Source, FilterGroup, EventAction } from "aws-cdk-lib/aws-codebuild";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { SourceDef } from "./source-def";
 
@@ -58,8 +58,41 @@ export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
     };
 }
 
-export class CdkBuildProjectConstruct extends Construct {
+export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
     constructor(scope: Construct, id: string, props: BuildSourceConstructProps) {
         super(scope, id);
+
+        // Create Separate Pipeline Projects: One for building, one for deploying
+        const synthProject = new PipelineProject(this, `CDK-Synth-Project-${props.sourceInfo.repo}`, {
+            projectName: `Project-Synth-${props.sourceInfo.repo}`,
+            buildSpec: BuildSpec.fromObject({
+                version: '0.2'
+            })
+        });
+        const synthOutput = new Artifact();
+
+        const deployProject = new PipelineProject(this, `CDK-Deploy-Project-${props.sourceInfo.repo}`, {
+            projectName: `Project-Deploy-${props.sourceInfo.repo}`,
+            buildSpec: BuildSpec.fromObject({
+                version: '0.2'
+            })
+        });
+
+        // Create a CodeBuild Action for each project
+        const synthAction = new CodeBuildAction({
+            actionName: `Synth-${props.sourceInfo.repo}`,
+            project: synthProject,
+            input: props.sourceArtifact,
+            outputs: [synthOutput]
+        });
+
+        const deployAction = new CodeBuildAction({
+            actionName: `Deploy-${props.sourceInfo.repo}`,
+            project: deployProject,
+            input: synthOutput
+            // Outputs for this step?
+        });
+
+        this.buildActions = [synthAction, deployAction];
     }
 }

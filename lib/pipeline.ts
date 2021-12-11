@@ -48,7 +48,7 @@ export class MultiSourcePipeline extends Construct {
             });
             multiSourcePipeline.addStage({
                 stageName: `Build-${source.repo}`,
-                actions: [codeBuild.buildAction]
+                actions: codeBuild.buildActions
             });
         }
 
