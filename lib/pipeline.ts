@@ -3,7 +3,7 @@ import { Action, Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { SourceDef } from "./source-def";
 import { SourceActionFactory } from "./source-factory";
-import { CodeBuildProjectConstruct } from "./code-build-project";
+import { createBuildProject } from "./code-build-project";
 
 export interface MultiSourcePipelineProps {
     sources: SourceDef[];
@@ -18,7 +18,7 @@ export class MultiSourcePipeline extends Construct {
     constructor(scope: Construct, id: string, props: MultiSourcePipelineProps) {
         super(scope, id);
 
-        const multiSourcePipeline = new Pipeline(this, 'Pipeline', {
+        const multiSourcePipeline = new Pipeline(scope, 'Pipeline', {
             pipelineName: props.pipelineName || 'MyPipeline',
             crossAccountKeys: props.crossAccount || false
         });
@@ -41,14 +41,14 @@ export class MultiSourcePipeline extends Construct {
 
         // Define the build stages
         for (const [source, artifact] of sourceArtifactTupleArray) {
-            const codeBuild = new CodeBuildProjectConstruct(this, `CodeBuild-${source.repo}`, {
+            const buildConstruct = createBuildProject(scope, {
                 sourceInfo: source,
                 sourceArtifact: artifact,
                 deployBucket: props.deployBucket
             });
             multiSourcePipeline.addStage({
                 stageName: `Build-${source.repo}`,
-                actions: codeBuild.buildActions
+                actions: buildConstruct.buildActions
             });
         }
 

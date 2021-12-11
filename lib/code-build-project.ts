@@ -3,15 +3,12 @@ import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Action, CodeBuildAction } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Artifacts, BuildSpec, Project, PipelineProject, Source, FilterGroup, EventAction } from "aws-cdk-lib/aws-codebuild";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { SourceDef } from "./source-def";
+import { CodeStarConnectionDef, SourceDef } from "./source-def";
 
 export interface BuildSourceConstructProps {
     sourceArtifact: Artifact;
-    sourceInfo: SourceDef;    
-}
-
-export interface CodeBuildProjectConstructProps extends BuildSourceConstructProps {
-    deployBucket: Bucket;
+    sourceInfo: SourceDef;
+    deployBucket?: Bucket;
 }
 
 export abstract class AbstractBuildProjectConstruct extends Construct {
@@ -24,11 +21,11 @@ export abstract class AbstractBuildProjectConstruct extends Construct {
 }
 
 export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
-    constructor(scope: Construct, id: string, props: CodeBuildProjectConstructProps) {
+    constructor(scope: Construct, id: string, props: BuildSourceConstructProps) {
         super(scope, id);
 
         // Define the CodeBuild Project
-        const project = new Project(this, 'SourceBuildProject', {
+        const project = new Project(scope, 'SourceBuildProject', {
             projectName: `Project-${props.sourceInfo.repo}`,
             source: Source.gitHub({
                 owner: props.sourceInfo.repoOwner,
@@ -63,7 +60,7 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
         super(scope, id);
 
         // Create Separate Pipeline Projects: One for building, one for deploying
-        const synthProject = new PipelineProject(this, `CDK-Synth-Project-${props.sourceInfo.repo}`, {
+        const synthProject = new PipelineProject(scope, `CDK-Synth-Project-${props.sourceInfo.repo}`, {
             projectName: `Project-Synth-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2'
@@ -71,7 +68,7 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
         });
         const synthOutput = new Artifact();
 
-        const deployProject = new PipelineProject(this, `CDK-Deploy-Project-${props.sourceInfo.repo}`, {
+        const deployProject = new PipelineProject(scope, `CDK-Deploy-Project-${props.sourceInfo.repo}`, {
             projectName: `Project-Deploy-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2'
@@ -94,5 +91,16 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
         });
 
         this.buildActions = [synthAction, deployAction];
+    }
+}
+
+export const createBuildProject = (scope: Construct, props: BuildSourceConstructProps) => {
+    if (props.sourceInfo.isCdkSource) {
+        return new CdkBuildProjectConstruct(scope, 'Cdk-Construct', props);
+    } else if (props.sourceInfo instanceof CodeStarConnectionDef) {
+        return new CodeBuildProjectConstruct(scope, `CodeBuild-${props.sourceInfo.repo}`, props);   
+    } else {
+        // TODO: What would it look like to support this?
+        throw TypeError('Invalid SourceDef type');
     }
 }
