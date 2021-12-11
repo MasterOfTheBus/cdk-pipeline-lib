@@ -5,17 +5,26 @@ import { Artifacts, Project, Source, FilterGroup, EventAction } from "aws-cdk-li
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { SourceDef } from "./source-def";
 
-export interface CodeBuildConstructProps {
+export interface BuildSourceConstructProps {
     sourceArtifact: Artifact;
-    sourceInfo: SourceDef;
+    sourceInfo: SourceDef;    
+}
+
+export interface CodeBuildProjectConstructProps extends BuildSourceConstructProps {
     deployBucket: Bucket;
 }
 
-export class CodeBuildProjectConstruct extends Construct {
-    public readonly buildAction: Action;
-    public readonly outputArtifact: Artifact;
+export abstract class AbstractBuildProjectConstruct extends Construct {
+    public buildActions: Action[];
+    public outputArtifact: Artifact;
 
-    constructor(scope: Construct, id: string, props: CodeBuildConstructProps) {
+    constructor(scope: Construct, id: string) {
+        super(scope, id);
+    }
+}
+
+export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
+    constructor(scope: Construct, id: string, props: CodeBuildProjectConstructProps) {
         super(scope, id);
 
         // Define the CodeBuild Project
@@ -38,11 +47,19 @@ export class CodeBuildProjectConstruct extends Construct {
         })
 
         this.outputArtifact = new Artifact();
-        this.buildAction = new CodeBuildAction({
-            actionName: `Build-${props.sourceInfo.repo}`,
-            project: project,
-            input: props.sourceArtifact,
-            outputs: [this.outputArtifact]
-        });
+        this.buildActions = [
+            new CodeBuildAction({
+                actionName: `Build-${props.sourceInfo.repo}`,
+                project: project,
+                input: props.sourceArtifact,
+                outputs: [this.outputArtifact]
+            })
+        ];
     };
+}
+
+export class CdkBuildProjectConstruct extends Construct {
+    constructor(scope: Construct, id: string, props: BuildSourceConstructProps) {
+        super(scope, id);
+    }
 }

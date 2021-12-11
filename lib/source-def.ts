@@ -2,17 +2,20 @@ export interface SourceDefProps {
     repo: string;
     repoOwner: string;
     branch?: string;
+    isCdkSource?: boolean
 }
 
 export abstract class SourceDef {
     public readonly repo: string;
     public readonly repoOwner: string;
     public readonly branch?: string;
+    public readonly isCdkSource?: boolean;
 
     constructor(props: SourceDefProps) {
         this.repo = props.repo;
         this.repoOwner = props.repoOwner;
         this.branch = props.branch;
+        this.isCdkSource = props.isCdkSource;
     }
 }
 
