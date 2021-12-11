@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # If there is a .commit file from the pre-commit hook, amend the commit to include package.json patch
-if [ -e .commit ]
-then
-    rm .commit
-    git add package.json
-    git commit --amend -C HEAD --no-verify -q
-fi
+# if [ -e .commit ]
+# then
+#     rm .commit
+#     git add package.json
+#     git commit --amend -C HEAD --no-verify -q
+# fi
