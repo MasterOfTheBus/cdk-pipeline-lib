@@ -46,9 +46,11 @@ export class MultiSourcePipeline extends Construct {
                 sourceArtifact: artifact,
                 deployBucket: props.deployBucket
             });
-            multiSourcePipeline.addStage({
-                stageName: `Build-${source.repo}`,
-                actions: buildConstruct.buildActions
+            buildConstruct.buildActions.forEach((actionList: Action[], index: number) => {
+                multiSourcePipeline.addStage({
+                    stageName: `Build-${source.repo}-${index}`,
+                    actions: actionList
+                });
             });
         }
 

@@ -62,36 +62,28 @@ test('Test CdkBuildProjectConstruct', () => {
     codeStarConnection: 'arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555',
     repo: 'test-repo',
     repoOwner: 'test-owner',
-    isCdkSource: true
+    isCdkSource: true,
   });
 
   const artifact = new Artifact();
 
   new CdkBuildProjectConstruct(stack, 'CdkSynthDeploy', {
     sourceArtifact: artifact,
-    sourceInfo: source
+    sourceInfo: source,
   });
 
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::CodeBuild::Project', 2);
   const projects = template.findResources('AWS::CodeBuild::Project');
 
-  const synthProject = Object.values(projects).find(value => 
-    value.Properties.Name === `Project-Synth-${source.repo}`
+  const synthProject = Object.values(projects).find(value =>
+    value.Properties.Name === `Project-Synth-${source.repo}`,
   );
-  const deployProject = Object.values(projects).find(value => 
-    value.Properties.Name === `Project-Deploy-${source.repo}`
+  const deployProject = Object.values(projects).find(value =>
+    value.Properties.Name === `Project-Deploy-${source.repo}`,
   );
   checkProjectProperties(synthProject);
   checkProjectProperties(deployProject);
-});
-
-describe('Test create Construct helper method', () => {
-  test('creates CDKBuildProject', () => {});
-
-  test('creates CodeBuildProjectConstruct', () => {});
-
-  test('Not supported', () => {});
 });
 
 const checkProjectProperties = (project: any) => {
@@ -102,4 +94,4 @@ const checkProjectProperties = (project: any) => {
 
   expect(project.Properties.Artifacts).toBeTruthy();
   expect(project.Properties.Artifacts.Type).toEqual('CODEPIPELINE');
-}
+};

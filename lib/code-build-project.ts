@@ -12,7 +12,7 @@ export interface BuildSourceConstructProps {
 }
 
 export abstract class AbstractBuildProjectConstruct extends Construct {
-    public buildActions: Action[];
+    public buildActions: Action[][];
     public outputArtifact: Artifact;
 
     constructor(scope: Construct, id: string) {
@@ -27,7 +27,7 @@ export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
         super(scope, id);
 
         // Define the CodeBuild Project
-        const project = new Project(scope, 'SourceBuildProject', {
+        const project = new Project(scope, `SourceBuildProject-${props.sourceInfo.repo}`, {
             projectName: `Project-${props.sourceInfo.repo}`,
             source: Source.gitHub({
                 owner: props.sourceInfo.repoOwner,
@@ -48,14 +48,14 @@ export class CodeBuildProjectConstruct extends AbstractBuildProjectConstruct {
         });
 
         this.outputArtifact = new Artifact();
-        this.buildActions = [
+        this.buildActions = [[
             new CodeBuildAction({
                 actionName: `Build-${props.sourceInfo.repo}`,
                 project: project,
                 input: props.sourceArtifact,
                 outputs: [this.outputArtifact]
             })
-        ];
+        ]];
     };
 }
 
@@ -98,7 +98,7 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
             // Outputs for this step?
         });
 
-        this.buildActions = [synthAction, deployAction];
+        this.buildActions = [[synthAction], [deployAction]];
     }
 }
 
