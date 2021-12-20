@@ -1,9 +1,9 @@
 import { Construct } from 'constructs';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
-import { Action, CodeBuildAction } from "aws-cdk-lib/aws-codepipeline-actions";
-import { Artifacts, BuildSpec, Project, PipelineProject, Source, FilterGroup, EventAction } from "aws-cdk-lib/aws-codebuild";
-import { Bucket } from "aws-cdk-lib/aws-s3";
-import { CodeStarConnectionDef, SourceDef } from "./source-def";
+import { Action, CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { Artifacts, BuildSpec, Project, PipelineProject, Source, FilterGroup, EventAction } from 'aws-cdk-lib/aws-codebuild';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { CodeStarConnectionDef, SourceDef } from './source-def';
 
 export interface BuildSourceConstructProps {
     sourceArtifact: Artifact;
@@ -69,8 +69,20 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
         const synthProject = new PipelineProject(scope, `CDK-Synth-Project-${props.sourceInfo.repo}`, {
             projectName: `Project-Synth-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
-                version: '0.2'
-                // TODO
+                version: '0.2',
+                phases: {
+                    build: {
+                        commands: [
+                            'npm ci',
+                            'npm run build',
+                            'npx cdk synth'
+                        ]
+                    }
+                },
+                artifacts: {
+                    'base-directory': 'cdk.out',
+                    files: '**/*'
+                }
             })
         });
         const synthOutput = new Artifact();
@@ -78,8 +90,20 @@ export class CdkBuildProjectConstruct extends AbstractBuildProjectConstruct {
         const deployProject = new PipelineProject(scope, `CDK-Deploy-Project-${props.sourceInfo.repo}`, {
             projectName: `Project-Deploy-${props.sourceInfo.repo}`,
             buildSpec: BuildSpec.fromObject({
-                version: '0.2'
-                // TODO
+                version: '0.2',
+                phases: {
+                    install: {
+                        commands: [
+                            'npm install -g aws-cdk'
+                        ]
+                    },
+                    build: {
+                        commands: [
+                            'cdk -a . deploy CdkPipelineExampleStack --require-approval=never --verbose'
+                        ]
+                    }
+                }
+                // TODO Name of the stack!
             })
         });
 
