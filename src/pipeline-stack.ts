@@ -15,7 +15,8 @@ class PipelineStack extends Stack {
         super(scope, id, props.stackProps);
 
         const sourceDef = props.pipelineSource;
-        const pipeline = new CodePipeline(this, 'Pipeline', {
+        // TODO: const pipeline = 
+        new CodePipeline(this, 'Pipeline', {
             synth: new ShellStep('Synth', {
                 // Use a connection created using the AWS console to authenticate to GitHub
                 // Other sources are available.
