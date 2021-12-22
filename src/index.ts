@@ -1,5 +1,5 @@
-import { CodeStarConnectionDef } from "./source-def";
-import { MultiSourcePipeline } from "./pipeline";
+import { MultiSourcePipeline } from './pipeline';
+import { CodeStarConnectionDef } from './source-def';
 
 export { CodeStarConnectionDef };
-export { MultiSourcePipeline }
+export { MultiSourcePipeline };
