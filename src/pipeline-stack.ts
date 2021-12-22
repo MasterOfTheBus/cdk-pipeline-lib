@@ -1,5 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib/core';
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { CodeStarConnectionDef } from './source-def';
 
@@ -7,23 +6,23 @@ interface PipelineStackProps {
      // TODO: Better source definitions?
     pipelineSource: CodeStarConnectionDef;
     sources: CodeStarConnectionDef[];
-    stackProps?: StackProps;
 }
 
-class PipelineStack extends Stack {
-    constructor(scope: Construct, id: string, props: PipelineStackProps) {
-        super(scope, id, props.stackProps);
+class CodePipelineConstruct extends Construct {
+    public readonly pipeline: CodePipeline;
 
-        const sourceDef = props.pipelineSource;
-        // TODO: const pipeline = 
-        new CodePipeline(this, 'Pipeline', {
+    constructor(scope: Construct, id: string, props: PipelineStackProps) {
+        super(scope, id);
+
+        const pipelineSource = props.pipelineSource;
+        this.pipeline = new CodePipeline(this, 'Pipeline', {
             synth: new ShellStep('Synth', {
                 // Use a connection created using the AWS console to authenticate to GitHub
                 // Other sources are available.
                 input: CodePipelineSource.connection(
-                    `${sourceDef.repoOwner}/${sourceDef.repo}`,
-                    sourceDef.branch ? sourceDef.branch : 'main',
-                    { connectionArn: sourceDef.codeStarConnection }
+                    `${pipelineSource.repoOwner}/${pipelineSource.repo}`,
+                    pipelineSource.branch ? pipelineSource.branch : 'main',
+                    { connectionArn: pipelineSource.codeStarConnection }
                 ),
                 commands: [
                     'npm ci',
@@ -33,6 +32,20 @@ class PipelineStack extends Stack {
             }),
         });
 
-
+        props.sources.forEach(source => {
+            this.pipeline.addWave('SourceBuild', {
+                post: [
+                    new CodeBuildStep('Build Source', {
+                        commands: source.buildCommands,
+                        input: CodePipelineSource.connection(
+                            `${source.repoOwner}/${source.repo}`,
+                            source.branch ? source.branch : 'main',
+                            { connectionArn: source.codeStarConnection}
+                        )
+                    })
+                ]
+            });
+        })
     }
 }
+
