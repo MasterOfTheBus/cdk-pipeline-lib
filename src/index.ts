@@ -1,5 +1,5 @@
-export class Hello {
-  public sayHello() {
-    return 'hello, world!';
-  }
-}
+import { MultiSourcePipeline } from './pipeline';
+import { CodeStarConnectionDef } from './source-def';
+
+export { CodeStarConnectionDef };
+export { MultiSourcePipeline };
