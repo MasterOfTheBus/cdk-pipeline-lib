@@ -9,13 +9,13 @@ export abstract class SourceDef {
   public readonly repo: string;
   public readonly repoOwner: string;
   public readonly buildCommands: string[];
-  public readonly branch?: string;
+  public readonly branch: string;
 
   constructor(props: SourceDefProps) {
     this.repo = props.repo;
     this.repoOwner = props.repoOwner;
     this.buildCommands = props.buildCommands ? props.buildCommands : [];
-    this.branch = props.branch;
+    this.branch = props.branch ? props.branch : 'main';
   }
 }
 
