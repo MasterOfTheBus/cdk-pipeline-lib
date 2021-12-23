@@ -1,7 +1,7 @@
 export interface SourceDefProps {
   repo: string;
   repoOwner: string;
-  buildCommands: string[];
+  buildCommands?: string[];
   branch?: string;
 }
 
@@ -14,7 +14,7 @@ export abstract class SourceDef {
   constructor(props: SourceDefProps) {
     this.repo = props.repo;
     this.repoOwner = props.repoOwner;
-    this.buildCommands = props.buildCommands;
+    this.buildCommands = props.buildCommands ? props.buildCommands : [];
     this.branch = props.branch;
   }
 }
