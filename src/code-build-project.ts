@@ -18,30 +18,33 @@ export class CodeBuildProjectConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodeBuildConstructProps) {
     super(scope, id);
 
+    const { sourceArtifact, deployBucket } = props;
+    const { repo, repoOwner, branch } = props.sourceInfo;
+
     // Define the CodeBuild Project
-    const project = new Project(this, 'SourceBuildProject', {
-      projectName: `Project-${props.sourceInfo.repo}`,
+    const project = new Project(this, `SourceBuildProject-${repo}`, {
+      projectName: `Project-${repo}`,
       source: Source.gitHub({
-        owner: props.sourceInfo.repoOwner,
-        repo: props.sourceInfo.repo,
+        owner: repoOwner,
+        repo: repo,
         webhook: true,
         webhookFilters: [
           FilterGroup
             .inEventOf(EventAction.PUSH)
-            .andBranchIs('main'),
+            .andBranchIs(branch),
         ],
       }),
       artifacts: Artifacts.s3({
         // Use name from the buildspec
-        bucket: props.deployBucket,
+        bucket: deployBucket,
       }),
     });
 
     this.outputArtifact = new Artifact();
     this.buildAction = new CodeBuildAction({
-      actionName: `Build-${props.sourceInfo.repo}`,
+      actionName: `Build-${repo}`,
       project: project,
-      input: props.sourceArtifact,
+      input: sourceArtifact,
       outputs: [this.outputArtifact],
     });
   };
