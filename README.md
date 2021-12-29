@@ -23,43 +23,9 @@ npm install @masterofthebus/cdk-pipeline-lib@0.1.6
 ```
 
 ## Usage
-
-```
-import { CodeStarConnectionDef, MultiSourcePipeline } from '@masterofthebus/cdk-pipeline-lib/lib';
-
-export class CdkPipelineExampleStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
-  
-    // Other configurations...
-
-    // The source definition
-    const source = new CodeStarConnectionDef({
-        // A CodeStar Connection ARN
-        codeStarConnection: "arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555",
-        repo: "test-repo",
-        repoOwner: "test-owner",
-        branch: "main"
-    });
-
-    // Define the bucket to store the artifacts
-    const bucket = new Bucket(stack, 'PipelineBucket');
-
-    // The pipeline construct
-    new MultiSourcePipeline(stack, 'MultiSourcePipline', {
-        sources: [source],
-        deployBucket: bucket
-    });
-    
-    // Some more configurations
-  }
-}
-```
+See `code-pipeline.test.ts` for an example. TODO: actual example
 
 ## Useful commands
-
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
 
 ## Developer
 
