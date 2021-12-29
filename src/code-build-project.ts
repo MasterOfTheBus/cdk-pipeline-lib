@@ -36,8 +36,10 @@ export class CodeBuildProjectConstruct extends Construct {
         ],
       }),
       artifacts: Artifacts.s3({
-        // Use name from the buildspec
         bucket: deployBucket,
+        includeBuildId: false, // Don't use the build id so that we can specify the path
+        path: repo,
+        // TODO: Identifier?
       }),
     });
 
