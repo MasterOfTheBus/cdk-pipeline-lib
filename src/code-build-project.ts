@@ -1,14 +1,15 @@
 import { Artifacts, Project, Source, FilterGroup, EventAction } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Action, CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
-import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { SourceDef } from './source-def';
 
 export interface CodeBuildConstructProps {
   sourceArtifact: Artifact;
   sourceInfo: SourceDef;
-  deployBucket: Bucket;
+  deployBucket: IBucket;
+  outputArtifact?: Artifact;
 }
 
 export class CodeBuildProjectConstruct extends Construct {
@@ -18,7 +19,7 @@ export class CodeBuildProjectConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodeBuildConstructProps) {
     super(scope, id);
 
-    const { sourceArtifact, deployBucket } = props;
+    const { sourceArtifact, deployBucket, outputArtifact } = props;
     const { repo, repoOwner, branch } = props.sourceInfo;
 
     // Define the CodeBuild Project
@@ -40,7 +41,7 @@ export class CodeBuildProjectConstruct extends Construct {
       }),
     });
 
-    this.outputArtifact = new Artifact();
+    this.outputArtifact = outputArtifact ? outputArtifact : new Artifact();
     this.buildAction = new CodeBuildAction({
       actionName: `Build-${repo}`,
       project: project,

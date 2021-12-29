@@ -1,3 +1,4 @@
+import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
@@ -8,17 +9,17 @@ export interface CodePipelineConstructProps {
   // TODO: Better source definitions?
   pipelineSource: CodeStarConnectionDef;
   source: CodeStarConnectionDef;
-  artifactBucket?: Bucket;
+  outputArtifact?: Artifact;
+  artifactBucketArn?: string;
 }
 
 export class CodePipelineConstruct extends Construct {
   public readonly pipeline: CodePipeline;
-  public readonly artifactBucket: Bucket;
 
   constructor(scope: Construct, id: string, props: CodePipelineConstructProps) {
     super(scope, id);
 
-    const { pipelineSource, source, artifactBucket } = props;
+    const { pipelineSource, source, artifactBucketArn } = props;
 
     const pipelineSourceSet = CodePipelineSource.connection(
       `${pipelineSource.repoOwner}/${pipelineSource.repo}`,
@@ -49,13 +50,16 @@ export class CodePipelineConstruct extends Construct {
     });
 
     // Create the artifact bucket if not defined
-    this.artifactBucket = artifactBucket ? artifactBucket : new Bucket(scope, 'ArtifactBucket');
+    const artifactBucket = artifactBucketArn
+      ? Bucket.fromBucketArn(this, 'ArtifactBucket', artifactBucketArn)
+      : new Bucket(scope, 'ArtifactBucket');
     this.pipeline.addWave('SourceBuild', {
       post: [
         new UploadSourceS3Action(`Build-Source-${source.repo}`, {
           input: sourceSet,
           sourceInfo: source,
-          bucket: this.artifactBucket,
+          bucket: artifactBucket,
+          outputArtifact: props.outputArtifact,
         }),
       ],
     });
