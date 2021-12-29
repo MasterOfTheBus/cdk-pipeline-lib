@@ -89,9 +89,11 @@ test('Test Code Pipeline Construct', () => {
   };
 
   const artifactsExpected = {
-    NamespaceType: 'BUILD_ID',
+    Location: 'sng-test-bucket',
+    NamespaceType: 'NONE',
     OverrideArtifactName: true,
     Packaging: 'ZIP',
+    Path: 'source-repo',
     Type: 'S3',
   };
 
@@ -110,7 +112,9 @@ test('Test Code Pipeline Construct', () => {
       && value.Properties.Artifacts.NamespaceType === artifactsExpected.NamespaceType
       && value.Properties.Artifacts.OverrideArtifactName === artifactsExpected.OverrideArtifactName
       && value.Properties.Artifacts.Packaging === artifactsExpected.Packaging
-      && value.Properties.Artifacts.Type === artifactsExpected.Type;
+      && value.Properties.Artifacts.Type === artifactsExpected.Type
+      && value.Properties.Artifacts.Location === artifactsExpected.Location
+      && value.Properties.Artifacts.Path === artifactsExpected.Path;
   });
   expect(containsExpectedArtifact).toBeTruthy();
 });
