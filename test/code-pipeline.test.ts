@@ -57,6 +57,8 @@ class MyPipelineStack extends cdk.Stack {
       source: source,
       artifactBucketArn: bucketArn,
       outputArtifact: sourceOutputArtifact,
+      githubEmail: 'user@github.com',
+      githubUser: 'githubuser',
     });
 
     // The output artifact key?
@@ -123,15 +125,27 @@ test('Test Code Pipeline Construct', () => {
   const synthProject = Object.values(projectResources).find(value => {
     return value.Properties && value.Properties.Environment && value.Properties.Environment.EnvironmentVariables;
   });
-  expect(synthProject).toBeTruthy();
+
   if (!synthProject) {
     // Kind of redundant but it seems like the Typescript check sare complaining about the below line getting the env variables
     expect(synthProject).toBeTruthy();
   } else {
     const synthEnvVars = synthProject.Properties.Environment.EnvironmentVariables;
-    expect(synthEnvVars.length).toEqual(1);
-    expect(synthEnvVars[0].Name).toEqual('GITHUB_TOKEN');
-    expect(synthEnvVars[0].Type).toEqual('SECRETS_MANAGER');
-    expect(synthEnvVars[0].Value).toEqual('github-token');
+    expect(synthEnvVars.length).toEqual(3);
+
+    const tokenEnv = synthEnvVars.find((value: any) => value.Name === 'GITHUB_TOKEN');
+    expect(tokenEnv).toBeTruthy();
+    expect(tokenEnv.Type).toEqual('SECRETS_MANAGER');
+    expect(tokenEnv.Value).toEqual('github-token');
+
+    const userEnv = synthEnvVars.find((value: any) => value.Name === 'GITHUB_USER');
+    expect(userEnv).toBeTruthy();
+    expect(userEnv.Type).toEqual('PLAINTEXT');
+    expect(userEnv.Value).toEqual('githubuser');
+
+    const emailEnv = synthEnvVars.find((value: any) => value.Name === 'USER_EMAIL');
+    expect(emailEnv).toBeTruthy();
+    expect(emailEnv.Type).toEqual('PLAINTEXT');
+    expect(emailEnv.Value).toEqual('user@github.com');
   }
 });
