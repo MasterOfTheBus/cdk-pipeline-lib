@@ -1,4 +1,4 @@
-import { Artifacts, Project, Source, FilterGroup, EventAction } from 'aws-cdk-lib/aws-codebuild';
+import { Artifacts, Project, Source } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Action, CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -20,7 +20,7 @@ export class CodeBuildProjectConstruct extends Construct {
     super(scope, id);
 
     const { sourceArtifact, deployBucket, outputArtifact } = props;
-    const { repo, repoOwner, branch } = props.sourceInfo;
+    const { repo, repoOwner } = props.sourceInfo; // TODO: Branch?
 
     // Define the CodeBuild Project
     const project = new Project(this, `SourceBuildProject-${repo}`, {
@@ -28,12 +28,12 @@ export class CodeBuildProjectConstruct extends Construct {
       source: Source.gitHub({
         owner: repoOwner,
         repo: repo,
-        webhook: true,
-        webhookFilters: [
-          FilterGroup
-            .inEventOf(EventAction.PUSH)
-            .andBranchIs(branch),
-        ],
+        // webhook: true,
+        // webhookFilters: [
+        //   FilterGroup
+        //     .inEventOf(EventAction.PUSH)
+        //     .andBranchIs(branch),
+        // ],
       }),
       artifacts: Artifacts.s3({
         bucket: deployBucket,
