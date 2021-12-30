@@ -1,6 +1,7 @@
+import { BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { CodeStarConnectionDef } from './source-def';
 import { UploadSourceS3Action } from './upload-source-action';
@@ -21,6 +22,7 @@ export class CodePipelineConstruct extends Construct {
 
     const { pipelineSource, source, artifactBucketArn } = props;
 
+    // Use a connection created using the AWS console to authenticate to GitHub
     const pipelineSourceSet = CodePipelineSource.connection(
       `${pipelineSource.repoOwner}/${pipelineSource.repo}`,
       pipelineSource.branch,
@@ -34,10 +36,16 @@ export class CodePipelineConstruct extends Construct {
     );
 
     this.pipeline = new CodePipeline(this, 'Pipeline', {
-      synth: new ShellStep('Synth', {
-        // Use a connection created using the AWS console to authenticate to GitHub
-        // Other sources are available.
+      synth: new CodeBuildStep('Synth', {
         input: pipelineSourceSet,
+        buildEnvironment: {
+          environmentVariables: {
+            GITHUB_TOKEN: {
+              value: 'github-token',
+              type: BuildEnvironmentVariableType.SECRETS_MANAGER
+            }
+          }
+        },
         additionalInputs: {
           source: sourceSet,
         },
