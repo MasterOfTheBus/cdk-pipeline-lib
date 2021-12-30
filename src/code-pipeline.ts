@@ -42,9 +42,9 @@ export class CodePipelineConstruct extends Construct {
           environmentVariables: {
             GITHUB_TOKEN: {
               value: 'github-token',
-              type: BuildEnvironmentVariableType.SECRETS_MANAGER
-            }
-          }
+              type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+            },
+          },
         },
         additionalInputs: {
           source: sourceSet,

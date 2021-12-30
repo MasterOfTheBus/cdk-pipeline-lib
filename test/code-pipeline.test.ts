@@ -97,6 +97,7 @@ test('Test Code Pipeline Construct', () => {
     Type: 'S3',
   };
 
+  // TODO: Better tests
   const containsExpectedSource = Object.values(projectResources).some(value => {
     return value.Properties
       && value.Properties.Source
@@ -117,4 +118,20 @@ test('Test Code Pipeline Construct', () => {
       && value.Properties.Artifacts.Path === artifactsExpected.Path;
   });
   expect(containsExpectedArtifact).toBeTruthy();
+
+  // TODO: Probably not going to be the only project to require env variables; need a better test
+  const synthProject = Object.values(projectResources).find(value => {
+    return value.Properties && value.Properties.Environment && value.Properties.Environment.EnvironmentVariables;
+  });
+  expect(synthProject).toBeTruthy();
+  if (!synthProject) {
+    // Kind of redundant but it seems like the Typescript check sare complaining about the below line getting the env variables
+    expect(synthProject).toBeTruthy();
+  } else {
+    const synthEnvVars = synthProject.Properties.Environment.EnvironmentVariables;
+    expect(synthEnvVars.length).toEqual(1);
+    expect(synthEnvVars[0].Name).toEqual('GITHUB_TOKEN');
+    expect(synthEnvVars[0].Type).toEqual('SECRETS_MANAGER');
+    expect(synthEnvVars[0].Value).toEqual('github-token');
+  }
 });
