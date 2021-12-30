@@ -10,6 +10,8 @@ export interface CodePipelineConstructProps {
   // TODO: Better source definitions?
   pipelineSource: CodeStarConnectionDef;
   source: CodeStarConnectionDef;
+  githubUser: string;
+  githubEmail: string;
   outputArtifact?: Artifact;
   artifactBucketArn?: string;
 }
@@ -20,7 +22,7 @@ export class CodePipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodePipelineConstructProps) {
     super(scope, id);
 
-    const { pipelineSource, source, artifactBucketArn } = props;
+    const { pipelineSource, source, githubUser, githubEmail, outputArtifact, artifactBucketArn } = props;
 
     // Use a connection created using the AWS console to authenticate to GitHub
     const pipelineSourceSet = CodePipelineSource.connection(
@@ -40,16 +42,28 @@ export class CodePipelineConstruct extends Construct {
         input: pipelineSourceSet,
         buildEnvironment: {
           environmentVariables: {
+            GITHUB_USER: {
+              value: githubUser,
+              type: BuildEnvironmentVariableType.PLAINTEXT,
+            },
             GITHUB_TOKEN: {
               value: 'github-token',
               type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+            },
+            USER_EMAIL: {
+              value: githubEmail,
+              type: BuildEnvironmentVariableType.PLAINTEXT,
             },
           },
         },
         additionalInputs: {
           source: sourceSet,
         },
+        installCommands: [
+          'npm install -g npm-cli-login',
+        ],
         commands: [
+          'npm-cli-login -u $GITHUB_USER -p $GITHUB_TOKEN -e $USER_EMAIL -r https://npm.pkg.github.com',
           'npm ci',
           'npm run build',
           'npx cdk synth',
@@ -67,7 +81,7 @@ export class CodePipelineConstruct extends Construct {
           input: sourceSet,
           sourceInfo: source,
           bucket: artifactBucket,
-          outputArtifact: props.outputArtifact,
+          outputArtifact: outputArtifact,
         }),
       ],
     });
