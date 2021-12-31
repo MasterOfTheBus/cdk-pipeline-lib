@@ -44,12 +44,4 @@ test('Test Code Build Construct', () => {
   expect(project.Properties.Artifacts.Type).toEqual('S3');
   expect(project.Properties.Artifacts.Packaging).toEqual('ZIP');
   expect(project.Properties.Artifacts.Location).toBeTruthy();
-
-  const expectedTriggerFilter = [
-    [
-      { Pattern: 'PUSH', Type: 'EVENT' },
-      { Pattern: 'refs/heads/main', Type: 'HEAD_REF' },
-    ],
-  ];
-  expect(project.Properties.Triggers.FilterGroups).toStrictEqual(expectedTriggerFilter);
 });
