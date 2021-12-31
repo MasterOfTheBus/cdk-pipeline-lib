@@ -28,12 +28,6 @@ export class CodeBuildProjectConstruct extends Construct {
       source: Source.gitHub({
         owner: repoOwner,
         repo: repo,
-        // webhook: true,
-        // webhookFilters: [
-        //   FilterGroup
-        //     .inEventOf(EventAction.PUSH)
-        //     .andBranchIs(branch),
-        // ],
       }),
       artifacts: Artifacts.s3({
         bucket: deployBucket,
