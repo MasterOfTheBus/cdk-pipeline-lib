@@ -1,5 +1,4 @@
 import { Template } from 'aws-cdk-lib/assertions';
-import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Function, Runtime, S3Code } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import * as cdk from 'aws-cdk-lib/core';
@@ -53,22 +52,20 @@ class MyPipelineStack extends cdk.Stack {
       codeStarConnection: 'arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555',
       repo: 'source-repo',
       repoOwner: 'test-owner',
+      branch: 'release',
     });
 
-    const sourceOutputArtifact = new Artifact();
     const pipelineConstruct = new CodePipelineConstruct(this, 'TestPipeline', {
       pipelineSource: pipelineSource,
       source: source,
       artifactBucketArn: bucketArn,
       artifactKey: ctorProps.artifactKey ? ctorProps.artifactKey : undefined,
-      outputArtifact: sourceOutputArtifact,
       githubEmail: 'user@github.com',
       githubUser: 'githubuser',
     });
 
-    // The output artifact key?
     pipelineConstruct.pipeline.addStage(
-      new MyPipelineAppStage(this, 'test', bucketArn, sourceOutputArtifact.objectKey, {
+      new MyPipelineAppStage(this, 'test', bucketArn, 'artifact.zip', {
         env: { account: '025257542471', region: 'us-east-1' },
       }),
     );
@@ -91,6 +88,7 @@ test('Test Code Pipeline Construct', () => {
 
   const template = Template.fromStack(stack);
 
+  // ===== Check the CodeBuild Project Configurations =====
   template.resourceCountIs('AWS::CodeBuild::Project', 3);
   const projectResources = template.findResources('AWS::CodeBuild::Project');
 
@@ -109,15 +107,19 @@ test('Test Code Pipeline Construct', () => {
     Type: 'S3',
   };
 
-  // TODO: Better tests
-  const containsExpectedSource = Object.values(projectResources).some(value => {
+  const sourceProject = Object.values(projectResources).find(value => {
     return value.Properties
       && value.Properties.Source
-      && value.Properties.Source.Location === sourceExpected.Location
-      && value.Properties.Source.ReportBuildStatus === sourceExpected.ReportBuildStatus
-      && value.Properties.Source.Type === sourceExpected.Type;
+      && value.Properties.Source.Location === sourceExpected.Location;
   });
-  expect(containsExpectedSource).toBeTruthy();
+  if (!sourceProject) {
+    expect(sourceProject).toBeTruthy();
+  } else {
+    expect(sourceProject.Properties.Source).toBeTruthy();
+    const sourceProjectConfig = sourceProject.Properties.Source;
+    expect(sourceProjectConfig.ReportBuildStatus).toEqual(sourceExpected.ReportBuildStatus);
+    expect(sourceProjectConfig.Type).toEqual(sourceExpected.Type);
+  }
 
   const containsExpectedArtifact = Object.values(projectResources).some(value => {
     return value.Properties
@@ -137,7 +139,7 @@ test('Test Code Pipeline Construct', () => {
   });
 
   if (!synthProject) {
-    // Kind of redundant but it seems like the Typescript check sare complaining about the below line getting the env variables
+    // Kind of redundant but it seems like the Typescript checks are complaining about the below line getting the env variables
     expect(synthProject).toBeTruthy();
   } else {
     const synthEnvVars = synthProject.Properties.Environment.EnvironmentVariables;
@@ -159,6 +161,7 @@ test('Test Code Pipeline Construct', () => {
     expect(emailEnv.Value).toEqual('user@github.com');
   }
 
+  // ===== Get the Pipeline and check the stage configuration =====
   template.resourceCountIs('AWS::CodePipeline::Pipeline', 1);
   const pipelineResources = template.findResources('AWS::CodePipeline::Pipeline');
   expect(Object.values(pipelineResources).length).toEqual(1);
@@ -184,6 +187,12 @@ test('Test Code Pipeline Construct', () => {
   const sourceStage = stages.find((stage: any) => stage.Name === 'Source');
   expect(sourceStage).toBeTruthy();
   expect(sourceStage.Actions.length).toEqual(2); // Two actions because of pipeline source and other source
+  // The main input will be 0, additional will be later in array
+  expect(sourceStage.Actions[0].Configuration.ConnectionArn).toEqual('arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555');
+  expect(sourceStage.Actions[0].Configuration.FullRepositoryId).toEqual('test-owner/pipeline-repo');
+
+  expect(sourceStage.Actions[1].Configuration.ConnectionArn).toEqual('arn:aws:codestar-connections:us-east-1:000000000000:connection/11111111-2222-3333-4444-555555555555');
+  expect(sourceStage.Actions[1].Configuration.BranchName).toEqual('release');
 });
 
 

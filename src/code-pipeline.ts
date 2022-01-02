@@ -1,5 +1,4 @@
 import { BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
-import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
@@ -12,7 +11,6 @@ export interface CodePipelineConstructProps {
   source: CodeStarConnectionDef;
   githubUser: string;
   githubEmail: string;
-  outputArtifact?: Artifact;
   artifactBucketArn?: string;
   artifactKey?: string;
 }
@@ -23,7 +21,7 @@ export class CodePipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodePipelineConstructProps) {
     super(scope, id);
 
-    const { pipelineSource, source, githubUser, githubEmail, outputArtifact, artifactBucketArn, artifactKey } = props;
+    const { pipelineSource, source, githubUser, githubEmail, artifactBucketArn, artifactKey } = props;
 
     // Use a connection created using the AWS console to authenticate to GitHub
     const pipelineSourceSet = CodePipelineSource.connection(
@@ -86,7 +84,6 @@ export class CodePipelineConstruct extends Construct {
           sourceInfo: source,
           bucket: artifactBucket,
           artifactKey: artifactS3Key,
-          outputArtifact: outputArtifact,
         }),
       ],
     });

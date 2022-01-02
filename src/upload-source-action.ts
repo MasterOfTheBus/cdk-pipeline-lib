@@ -1,4 +1,4 @@
-import { Artifact, IStage } from 'aws-cdk-lib/aws-codepipeline';
+import { IStage } from 'aws-cdk-lib/aws-codepipeline';
 import { S3DeployAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { CodePipelineActionFactoryResult, ICodePipelineActionFactory, IFileSetProducer, ProduceActionOptions, Step } from 'aws-cdk-lib/pipelines';
@@ -10,7 +10,6 @@ export interface UploadSourceS3ActionProps {
   bucket: IBucket;
   artifactKey: string;
   sourceInfo: SourceDef;
-  outputArtifact?: Artifact;
 }
 
 export class UploadSourceS3Action extends Step implements ICodePipelineActionFactory {
@@ -18,7 +17,6 @@ export class UploadSourceS3Action extends Step implements ICodePipelineActionFac
   private bucket: IBucket;
   private artifactKey: string;
   private sourceInfo: SourceDef;
-  private outputArtifact?: Artifact;
 
   constructor(id: string, props: UploadSourceS3ActionProps) {
     super(id);
@@ -27,7 +25,6 @@ export class UploadSourceS3Action extends Step implements ICodePipelineActionFac
     this.bucket = props.bucket;
     this.artifactKey = props.artifactKey;
     this.sourceInfo = props.sourceInfo;
-    this.outputArtifact = props.outputArtifact;
   }
 
   produceAction(stage: IStage, options: ProduceActionOptions): CodePipelineActionFactoryResult {
@@ -42,7 +39,6 @@ export class UploadSourceS3Action extends Step implements ICodePipelineActionFac
       sourceArtifact: sourceArtifact,
       sourceInfo: this.sourceInfo,
       deployBucket: this.bucket,
-      outputArtifact: this.outputArtifact,
     });
 
     stage.addAction(construct.buildAction);
