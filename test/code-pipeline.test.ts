@@ -1,5 +1,4 @@
 import { Template } from 'aws-cdk-lib/assertions';
-import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { Function, Runtime, S3Code } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import * as cdk from 'aws-cdk-lib/core';
@@ -56,20 +55,17 @@ class MyPipelineStack extends cdk.Stack {
       branch: 'release',
     });
 
-    const sourceOutputArtifact = new Artifact();
     const pipelineConstruct = new CodePipelineConstruct(this, 'TestPipeline', {
       pipelineSource: pipelineSource,
       source: source,
       artifactBucketArn: bucketArn,
       artifactKey: ctorProps.artifactKey ? ctorProps.artifactKey : undefined,
-      outputArtifact: sourceOutputArtifact,
       githubEmail: 'user@github.com',
       githubUser: 'githubuser',
     });
 
-    // The output artifact key?
     pipelineConstruct.pipeline.addStage(
-      new MyPipelineAppStage(this, 'test', bucketArn, sourceOutputArtifact.objectKey, {
+      new MyPipelineAppStage(this, 'test', bucketArn, 'artifact.zip', {
         env: { account: '025257542471', region: 'us-east-1' },
       }),
     );

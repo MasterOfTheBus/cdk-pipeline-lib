@@ -9,7 +9,6 @@ export interface CodeBuildConstructProps {
   sourceArtifact: Artifact;
   sourceInfo: SourceDef;
   deployBucket: IBucket;
-  outputArtifact?: Artifact;
 }
 
 export class CodeBuildProjectConstruct extends Construct {
@@ -19,8 +18,8 @@ export class CodeBuildProjectConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodeBuildConstructProps) {
     super(scope, id);
 
-    const { sourceArtifact, deployBucket, outputArtifact } = props;
-    const { repo, repoOwner } = props.sourceInfo; // TODO: Branch?
+    const { sourceArtifact, deployBucket } = props;
+    const { repo, repoOwner } = props.sourceInfo;
 
     // Define the CodeBuild Project
     const project = new Project(this, `SourceBuildProject-${repo}`, {
@@ -37,7 +36,7 @@ export class CodeBuildProjectConstruct extends Construct {
       }),
     });
 
-    this.outputArtifact = outputArtifact ? outputArtifact : new Artifact();
+    this.outputArtifact = new Artifact();
     this.buildAction = new CodeBuildAction({
       actionName: `Build-${repo}`,
       project: project,
