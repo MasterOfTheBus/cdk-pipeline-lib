@@ -14,6 +14,7 @@ export interface CodePipelineConstructProps {
   githubEmail: string;
   outputArtifact?: Artifact;
   artifactBucketArn?: string;
+  artifactKey?: string;
 }
 
 export class CodePipelineConstruct extends Construct {
@@ -22,7 +23,7 @@ export class CodePipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CodePipelineConstructProps) {
     super(scope, id);
 
-    const { pipelineSource, source, githubUser, githubEmail, outputArtifact, artifactBucketArn } = props;
+    const { pipelineSource, source, githubUser, githubEmail, outputArtifact, artifactBucketArn, artifactKey } = props;
 
     // Use a connection created using the AWS console to authenticate to GitHub
     const pipelineSourceSet = CodePipelineSource.connection(
@@ -75,12 +76,16 @@ export class CodePipelineConstruct extends Construct {
     const artifactBucket = artifactBucketArn
       ? Bucket.fromBucketArn(this, 'ArtifactBucket', artifactBucketArn)
       : new Bucket(scope, 'ArtifactBucket');
+    const artifactS3Key = artifactKey
+      ? artifactKey
+      : 'artifact.zip';
     this.pipeline.addWave('SourceBuild', {
       post: [
         new UploadSourceS3Action(`Build-Source-${source.repo}`, {
           input: sourceSet,
           sourceInfo: source,
           bucket: artifactBucket,
+          artifactKey: artifactS3Key,
           outputArtifact: outputArtifact,
         }),
       ],
