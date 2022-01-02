@@ -33,8 +33,12 @@ class MyPipelineAppStage extends cdk.Stage {
   }
 }
 
+interface PipelineStackProps {
+  artifactKey?: string;
+}
+
 class MyPipelineStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, ctorProps: PipelineStackProps, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const bucketArn = 'arn:aws:s3:::sng-test-bucket';
@@ -56,6 +60,7 @@ class MyPipelineStack extends cdk.Stack {
       pipelineSource: pipelineSource,
       source: source,
       artifactBucketArn: bucketArn,
+      artifactKey: ctorProps.artifactKey ? ctorProps.artifactKey : undefined,
       outputArtifact: sourceOutputArtifact,
       githubEmail: 'user@github.com',
       githubUser: 'githubuser',
@@ -75,9 +80,14 @@ class MyPipelineStack extends cdk.Stack {
 test('Test Code Pipeline Construct', () => {
   const app = new cdk.App();
 
-  const stack = new MyPipelineStack(app, 'TestPipelineStack', {
-    env: { account: '025257542471', region: 'us-east-1' },
-  });
+  const stack = new MyPipelineStack(app, 'TestPipelineStack',
+    {
+      artifactKey: 'key.zip',
+    },
+    {
+      env: { account: '025257542471', region: 'us-east-1' },
+    },
+  );
 
   const template = Template.fromStack(stack);
 
@@ -148,4 +158,51 @@ test('Test Code Pipeline Construct', () => {
     expect(emailEnv.Type).toEqual('PLAINTEXT');
     expect(emailEnv.Value).toEqual('user@github.com');
   }
+
+  template.resourceCountIs('AWS::CodePipeline::Pipeline', 1);
+  const pipelineResources = template.findResources('AWS::CodePipeline::Pipeline');
+  expect(Object.values(pipelineResources).length).toEqual(1);
+  const pipeline = Object.values(pipelineResources)[0];
+  expect(pipeline).toBeTruthy();
+  expect(pipeline.Properties.Stages).toBeTruthy();
+
+  const stages = pipeline.Properties.Stages;
+
+  const sourceBuildStage = stages.find((stage: any) => stage.Name === 'SourceBuild');
+  expect(sourceBuildStage).toBeTruthy();
+  expect(sourceBuildStage.Actions.length).toEqual(2); // Two actions because of pipeline source and other source
+  expect(sourceBuildStage.Actions[0].ActionTypeId.Provider).toEqual('CodeBuild');
+  expect(sourceBuildStage.Actions[0].ActionTypeId.Category).toEqual('Build');
+  expect(sourceBuildStage.Actions[1].ActionTypeId.Provider).toEqual('S3');
+  expect(sourceBuildStage.Actions[1].ActionTypeId.Category).toEqual('Deploy');
+  expect(sourceBuildStage.Actions[1].Configuration.ObjectKey).toEqual('source-repo/key.zip');
+  expect(sourceBuildStage.Actions[1].Configuration.BucketName).toEqual('sng-test-bucket');
+
+  const appStage = stages.find((stage: any) => stage.Name === 'test'); // stage was named test
+  expect(appStage).toBeTruthy();
+
+  const sourceStage = stages.find((stage: any) => stage.Name === 'Source');
+  expect(sourceStage).toBeTruthy();
+  expect(sourceStage.Actions.length).toEqual(2); // Two actions because of pipeline source and other source
+});
+
+
+test('Test Code Pipeline Construct No Artifact Specified', () => {
+  const app = new cdk.App();
+
+  const stack = new MyPipelineStack(app, 'TestPipelineStack', {}, {
+    env: { account: '025257542471', region: 'us-east-1' },
+  });
+
+  const template = Template.fromStack(stack);
+
+  template.resourceCountIs('AWS::CodePipeline::Pipeline', 1);
+  const pipelineResources = template.findResources('AWS::CodePipeline::Pipeline');
+  expect(Object.values(pipelineResources).length).toEqual(1);
+  const pipeline = Object.values(pipelineResources)[0];
+  const stages = pipeline.Properties.Stages;
+  const sourceBuildStage = stages.find((stage: any) => stage.Name === 'SourceBuild');
+  expect(sourceBuildStage).toBeTruthy();
+  expect(sourceBuildStage.Actions[1].Configuration.ObjectKey).toEqual('source-repo/artifact.zip');
+  expect(sourceBuildStage.Actions[1].Configuration.BucketName).toEqual('sng-test-bucket');
 });
