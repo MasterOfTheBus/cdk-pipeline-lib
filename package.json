@@ -1,5 +1,5 @@
 {
-  "name": "@masterofthebus/cdk-pipeline-lib",
+  "name": "@yendisng/cdk-pipeline-lib",
   "repository": {
     "type": "git",
     "url": "git@github.com:MasterOfTheBus/cdk-pipeline-lib.git"
@@ -70,9 +70,6 @@
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "version": "0.0.0",
   "jest": {
     "testMatch": [
