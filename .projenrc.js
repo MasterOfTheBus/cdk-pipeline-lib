@@ -10,10 +10,8 @@ const project = new awscdk.AwsCdkConstructLibrary({
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
-  packageName: '@masterofthebus/cdk-pipeline-lib', /* The "name" in package.json. */
+  packageName: '@yendisng/cdk-pipeline-lib', /* The "name" in package.json. */
   // release: undefined,      /* Add release management to this project. */
-  npmRegistryUrl: 'https://npm.pkg.github.com',
-  npmTokenSecret: 'GITHUB_TOKEN',
   minNodeVersion: '14.17.0',
   releaseToNpm: true,
   gitignore: [
