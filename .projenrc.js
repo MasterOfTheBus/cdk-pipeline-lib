@@ -1,4 +1,5 @@
 const { awscdk } = require('projen');
+const { NpmAccess } = require('projen/lib/javascript');
 const project = new awscdk.AwsCdkConstructLibrary({
   author: 'Sidney Ng',
   authorAddress: 'yendisng@gmail.com',
@@ -12,6 +13,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   // devDeps: [],             /* Build dependencies for this module. */
   packageName: '@yendisng/cdk-pipeline-lib', /* The "name" in package.json. */
   // release: undefined,      /* Add release management to this project. */
+  npmAccess: NpmAccess.PUBLIC,
   minNodeVersion: '14.17.0',
   releaseToNpm: true,
   gitignore: [
